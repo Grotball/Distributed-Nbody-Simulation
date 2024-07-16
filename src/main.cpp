@@ -151,7 +151,21 @@ int main(int argc, char** argv)
 
 
     #ifdef ENABLE_OPENGL
-        unsigned int vao, vbo;
+        // TODO: compute these.
+        float projectionMatrix[16];
+        float viewMatrix[16];
+        // Assigning identity matrix to each
+        // so that compiler won't complain.
+        for (int i = 0, k = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++, k++)
+            {
+                projectionMatrix[k] = i == j ? 1 : 0;
+                viewMatrix[k] = i == j ? 1 : 0;
+            }
+        }
+
+        unsigned int vao, vbo, particleShader;
 
         if (isRenderer)
         {
@@ -171,6 +185,19 @@ int main(int argc, char** argv)
                 glVertexAttribPointer(i, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(i * numParticles * sizeof(float)));
                 glEnableVertexAttribArray(i);
             }
+
+            particleShader = createShader(std::filesystem::path("src/shaders/particle.vert"), std::filesystem::path("src/shaders/particle.frag"));
+
+            glUseProgram(particleShader);
+            glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, viewMatrix);
+            glUniformMatrix4fv(glGetUniformLocation(particleShader, "projection"), 1, GL_FALSE, projectionMatrix);
+
+            #ifdef USE_GLES
+                glEnable(GL_VERTEX_PROGRAM_POINTSIZE);
+            #else
+                glEnable(GL_PROGRAM_POINT_SIZE);
+            #endif
+            glEnable(GL_DEPTH_TEST);  
         }
     #endif
     
@@ -213,7 +240,12 @@ int main(int argc, char** argv)
             glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), vel);
             
             glClearColor(0.05f, 0.06f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glUseProgram(particleShader);
+            glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, viewMatrix);
+
+            glDrawArrays(GL_POINTS, 0, numParticles);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
