@@ -1,5 +1,6 @@
 #include <iostream>
 #include <mpi.h>
+#include <random>
 
 
 #ifdef ENABLE_OPENGL
@@ -22,6 +23,8 @@ constexpr bool onlyMasterRenders = true;
 constexpr bool renderersDoWork = true;
 constexpr bool masterCanDoWork = true;
 constexpr bool masterIsWorker = masterCanDoWork && renderersDoWork;
+
+constexpr int numParticles = 64;
 
 
 int main(int argc, char** argv)
@@ -95,6 +98,85 @@ int main(int argc, char** argv)
 
 
 
+    std::vector<int> loPartitionIndices;
+    std::vector<int> hiPartitionIndices;
+    std::vector<int> partitionSizes;
+    
+    int partitionSizeLimit = (int)std::ceil(numParticles * 1.0 / workerSize);
+    for (int i = 0; i < workerSize; i++)
+    {
+        loPartitionIndices.push_back(i * partitionSizeLimit);
+        hiPartitionIndices.push_back(std::min((i+1) * partitionSizeLimit, numParticles));
+        partitionSizes.push_back(hiPartitionIndices.back() - loPartitionIndices.back());
+    }
+
+
+    // Vector quantities are stored in a linearly index array. The x, y, z components are NOT
+    // interleaved. All the x-components contiguous, followed contiguously by all the y-components.
+
+    float* pos = new float[3 * numParticles];
+    float* vel = new float[3 * numParticles];
+    float* acc = new float[3 * numParticles];
+    float* mass = new float[numParticles];
+
+    MPI_Datatype vecArrayType, vecArrayTypeNonResized;
+    MPI_Type_vector(3, 1, numParticles, MPI_FLOAT, &vecArrayTypeNonResized);
+    MPI_Type_commit(&vecArrayTypeNonResized);
+    MPI_Type_create_resized(vecArrayTypeNonResized, 0, 1 * sizeof(float), &vecArrayType);
+    MPI_Type_commit(&vecArrayType);
+    MPI_Type_free(&vecArrayTypeNonResized);
+
+    if (isMaster)
+    {
+        std::mt19937 rng(42);
+        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+        for (int i = 0; i < numParticles; i++)
+        {
+            pos[i] = 10 * dist(rng);
+            pos[i+numParticles] = 10 * dist(rng);
+            pos[i+2*numParticles] = 0;
+            for (int k = 0; k < 3; k++)
+            {
+                vel[i+k*numParticles] = 0;
+
+            }
+            mass[i] = 100.0f / numParticles;
+        }
+    }
+
+    MPI_Bcast(pos, numParticles * 3, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
+    MPI_Bcast(vel, numParticles * 3, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
+    MPI_Bcast(mass, numParticles, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
+
+
+
+    #ifdef ENABLE_OPENGL
+        unsigned int vao, vbo;
+
+        if (isRenderer)
+        {
+            glGenVertexArrays(1, &vao);
+            glGenBuffers(1, &vbo);
+
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+            glBufferData(GL_ARRAY_BUFFER, 7 * numParticles * sizeof(float), nullptr, GL_STATIC_DRAW);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * numParticles * sizeof(float), pos);
+            glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), vel);
+            glBufferSubData(GL_ARRAY_BUFFER, 6 * numParticles * sizeof(float), 1 * numParticles * sizeof(float), mass);
+
+            for (int i = 0; i < 7; i++)
+            {
+                glVertexAttribPointer(i, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(i * numParticles * sizeof(float)));
+                glEnableVertexAttribArray(i);
+            }
+        }
+    #endif
+    
+    
+
+
     bool shouldRun = true;
 
     while (shouldRun)
@@ -124,6 +206,12 @@ int main(int argc, char** argv)
 
         if (isRenderer)
         {
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * numParticles * sizeof(float), pos);
+            glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), vel);
+            
             glClearColor(0.05f, 0.06f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
@@ -142,14 +230,29 @@ int main(int argc, char** argv)
 
 
 
+
+
+
+
+    delete[] pos;
+    delete[] vel;
+    delete[] acc;
+    delete[] mass;
+
+
+
     #ifdef ENABLE_OPENGL
         if (isRenderer)
         {
+            glDeleteVertexArrays(1, &vao);
+            glDeleteBuffers(1, &vbo);
+            
             glfwDestroyWindow(window);
             glfwTerminate();
         }
     #endif
 
+    MPI_Type_free(&vecArrayType);
 
     MPI_Comm_free(&workerComm);
     MPI_Comm_free(&rendererComm);
