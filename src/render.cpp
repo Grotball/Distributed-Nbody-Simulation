@@ -1,5 +1,7 @@
 #include "render.h"
 
+#ifdef ENABLE_OPENGL
+
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -122,3 +124,5 @@ unsigned int createShader(const std::filesystem::path& vertPath, const std::file
 
     return shaderProgram;
 }
+
+#endif
