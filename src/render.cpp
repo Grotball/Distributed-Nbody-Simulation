@@ -125,4 +125,18 @@ unsigned int createShader(const std::filesystem::path& vertPath, const std::file
     return shaderProgram;
 }
 
+void computeProjectionMatrix(float projection[16], const float fov, const float aspectRatio, const float nearClip, const float farClip)
+{
+    float t = 1.0f / std::tan(0.5f * fov);
+    // Matrix uses coloumn major ordering.
+    float A[] = {
+        t, 0, 0, 0,
+        0, aspectRatio * t, 0, 0,
+        0, 0, -(nearClip + farClip) / (farClip - nearClip), -1,
+        0, 0, -2 * nearClip * farClip / (farClip - nearClip), 0
+    };
+    
+    std::memcpy(projection, A, 16 * sizeof(float));
+}
+
 #endif

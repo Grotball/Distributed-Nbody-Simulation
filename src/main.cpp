@@ -132,11 +132,9 @@ int main(int argc, char** argv)
         std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
         for (int i = 0; i < numParticles; i++)
         {
-            pos[i] = 10 * dist(rng);
-            pos[i+numParticles] = 10 * dist(rng);
-            pos[i+2*numParticles] = 0;
             for (int k = 0; k < 3; k++)
             {
+                pos[i+k*numParticles] = 10 * dist(rng);
                 vel[i+k*numParticles] = 0;
 
             }
@@ -151,19 +149,17 @@ int main(int argc, char** argv)
 
 
     #ifdef ENABLE_OPENGL
-        // TODO: compute these.
         float projectionMatrix[16];
         float viewMatrix[16];
-        // Assigning identity matrix to each
-        // so that compiler won't complain.
+        // Set to identity.
         for (int i = 0, k = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++, k++)
             {
-                projectionMatrix[k] = i == j ? 1 : 0;
                 viewMatrix[k] = i == j ? 1 : 0;
             }
         }
+        computeProjectionMatrix(projectionMatrix, 3.141f/2, 1, 0.1f, 100);
 
         unsigned int vao, vbo, particleShader;
 
@@ -185,6 +181,7 @@ int main(int argc, char** argv)
                 glVertexAttribPointer(i, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(i * numParticles * sizeof(float)));
                 glEnableVertexAttribArray(i);
             }
+             
 
             particleShader = createShader(std::filesystem::path("src/shaders/particle.vert"), std::filesystem::path("src/shaders/particle.frag"));
 

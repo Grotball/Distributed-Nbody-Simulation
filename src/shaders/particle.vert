@@ -18,7 +18,9 @@ void main()
     
     gl_Position = projection * view * vec4(pos, 1.0);
 
-    gl_PointSize = sqrt(mass);
+    // need to make independent from screen resolution.
+    // need to make scale properly with distance.
+    gl_PointSize = 15 * sqrt(mass);
 
     speed = length(vel);
 }
