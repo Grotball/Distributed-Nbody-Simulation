@@ -203,8 +203,37 @@ int main(int argc, char** argv)
 
     bool shouldRun = true;
 
+
+
+    // The timestep is the real-world time elapsed since start of last frame
+    // on the master process. But there is a hard limit on the maximum timestep size.
+    // If it  takes longer than this to compute frame,
+    // the time will instead update at a sub-realtime speed,
+    // to prevent the timestep being to large.
+    constexpr float maximumTimeStep = 1.0f / 60;
+
+    #ifdef ENABLE_OPENGL
+    float time = glfwGetTime();
+    #endif
+
+
     while (shouldRun)
     {
+        // The real world time since last frame. (is not same as simulation timestep).
+        float frameTime;
+        // the time step used in simulation.
+        float dt;
+        #ifdef ENABLE_OPENGL
+        if (isMaster)
+        {
+            auto time_old = time;
+            time = glfwGetTime();
+            frameTime = time - time_old;
+            dt = std::min(frameTime, maximumTimeStep);
+        }
+        #endif
+        MPI_Bcast(&dt, 1, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
+
         //========== Input ==========//
 
         #ifdef ENABLE_OPENGL
