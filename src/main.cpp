@@ -1,6 +1,7 @@
 #include <iostream>
 #include <mpi.h>
 #include <random>
+#include <cstring>
 
 
 #ifdef ENABLE_OPENGL
@@ -216,6 +217,15 @@ int main(int argc, char** argv)
 
     #ifdef ENABLE_OPENGL
     float time = glfwGetTime();
+    char windowTitle[64];
+    // keeps track of frames times
+    // to average over for an fps calculation.
+    constexpr int numFrameTimes = 32;
+    float frameTimes[numFrameTimes];
+    for (int i = 0; i < numFrameTimes; i++)
+    {
+        frameTimes[i] = maximumTimeStep;
+    }
     #endif
 
 
@@ -232,6 +242,20 @@ int main(int argc, char** argv)
             time = glfwGetTime();
             frameTime = time - time_old;
             dt = std::min(frameTime, maximumTimeStep);
+
+            float last = frameTime;
+            float sum = last;
+            for (int i = 0; i < numFrameTimes; i++)
+            {
+                sum += frameTimes[i];
+                auto q = frameTimes[i];
+                frameTimes[i] = last;
+                last = q;
+            }
+
+            float averageFrameTime = sum / (numFrameTimes + 1);
+            sprintf(windowTitle, "N Body Simulation  -  fps: %d", static_cast<int>(round(1 / averageFrameTime)));
+            glfwSetWindowTitle(window, windowTitle);
         }
         #endif
         MPI_Bcast(&dt, 1, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
