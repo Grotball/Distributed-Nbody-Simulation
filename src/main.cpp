@@ -324,6 +324,7 @@ int main(int argc, char** argv)
     #ifdef ENABLE_OPENGL
         if (isRenderer)
         {
+            glDeleteProgram(particleShader);
             glDeleteVertexArrays(1, &vao);
             glDeleteBuffers(1, &vbo);
             
