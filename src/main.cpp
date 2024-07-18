@@ -138,7 +138,7 @@ int main(int argc, char** argv)
                 vel[i+k*numParticles] = 0;
 
             }
-            mass[i] = 100.0f / numParticles;
+            mass[i] =  100.0f / numParticles / G;
         }
     }
 
@@ -250,7 +250,29 @@ int main(int argc, char** argv)
         
         //========== Physics ==========//
 
-        // empty...
+        if (isWorker)
+        {
+            nbodyIntegrate(pos, vel, acc, mass, numParticles, dt, loPartitionIndices, hiPartitionIndices, partitionSizes, workerComm);
+            MPI_Allgatherv(MPI_IN_PLACE, partitionSizes[workerRank], vecArrayType, pos, partitionSizes.data(), loPartitionIndices.data(), vecArrayType, workerComm);
+            MPI_Allgatherv(MPI_IN_PLACE, partitionSizes[workerRank], vecArrayType, vel, partitionSizes.data(), loPartitionIndices.data(), vecArrayType, workerComm);
+        }
+
+        if constexpr (masterIsWorker)
+        {
+            // If only the master process can render, there is not need to broadcast to itself.
+            if (isRenderer && !onlyMasterRenders)
+            {
+                MPI_Bcast(pos, numParticles * 3, MPI_FLOAT, masterRank, rendererComm);
+                MPI_Bcast(vel, numParticles * 3, MPI_FLOAT, masterRank, rendererComm);
+            }
+        }
+        else
+        {
+            // Currently this else block won't run because master must be renderer at the moment.
+            // Will later lift this restriction.
+        }
+
+
 
 
         //========== Rendering ==========//

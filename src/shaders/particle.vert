@@ -20,7 +20,7 @@ void main()
 
     // need to make independent from screen resolution.
     // need to make scale properly with distance.
-    gl_PointSize = 15 * sqrt(mass);
+    gl_PointSize = 10 * sqrt(mass*6.67e-11);
 
     speed = length(vel);
 }
