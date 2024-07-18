@@ -151,6 +151,7 @@ int main(int argc, char** argv)
     #ifdef ENABLE_OPENGL
         float projectionMatrix[16];
         float viewMatrix[16];
+        float fieldOfView = 0.5f * 3.141f;
         // Set to identity.
         for (int i = 0, k = 0; i < 4; i++)
         {
@@ -159,7 +160,7 @@ int main(int argc, char** argv)
                 viewMatrix[k] = i == j ? 1 : 0;
             }
         }
-        computeProjectionMatrix(projectionMatrix, 3.141f/2, 1, 0.1f, 100);
+        computeProjectionMatrix(projectionMatrix, fieldOfView, 1, 0.1f, 100);
 
         unsigned int vao, vbo, particleShader;
 
@@ -188,6 +189,7 @@ int main(int argc, char** argv)
             glUseProgram(particleShader);
             glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, viewMatrix);
             glUniformMatrix4fv(glGetUniformLocation(particleShader, "projection"), 1, GL_FALSE, projectionMatrix);
+            glUniform1f(glGetUniformLocation(particleShader, "fovScale"), 1.0f / std::tan(0.5f * fieldOfView));
 
             #ifdef USE_GLES
                 glEnable(GL_VERTEX_PROGRAM_POINTSIZE);

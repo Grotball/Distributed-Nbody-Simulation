@@ -6,21 +6,31 @@ layout (location = 4) in float vertexVelY;
 layout (location = 5) in float vertexVelZ;
 layout (location = 6) in float mass;
 
+out vec3 pos;
 out float speed;
 
+// TODO: combine view and projection
+// into single matrix.
 uniform mat4 view;
 uniform mat4 projection;
+uniform float fovScale;
 
 void main()
 {
-    vec3 pos = vec3(vertexPosX, vertexPosY, vertexPosZ);
+    pos = vec3(vertexPosX, vertexPosY, vertexPosZ);
     vec3 vel = vec3(vertexVelX, vertexVelY, vertexVelZ);
     
     gl_Position = projection * view * vec4(pos, 1.0);
 
+    // distance from view position.
+    // Because camera position is currently fixed to origin,
+    // it is just length of the vector.
+    float d = length(pos);
+
     // need to make independent from screen resolution.
-    // need to make scale properly with distance.
-    gl_PointSize = 10 * sqrt(mass*6.67e-11);
+    // Scaling of point size with distance does not take in
+    // acount perspective projection.
+    gl_PointSize = 50 * sqrt(mass*6.67e-11) * fovScale / d;
 
     speed = length(vel);
 }
