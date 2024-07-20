@@ -222,7 +222,8 @@ int main(int argc, char** argv)
 
         #endif
 
-        MPI_Bcast(&shouldRun, 1, MPI_CXX_BOOL, masterRank, MPI_COMM_WORLD);
+        MPI_Request shouldRunRequest;
+        MPI_Ibcast(&shouldRun, 1, MPI_CXX_BOOL, masterRank, MPI_COMM_WORLD, &shouldRunRequest);
 
         
         //========== Physics ==========//
@@ -270,22 +271,22 @@ int main(int argc, char** argv)
 
             glfwSwapBuffers(window);
             glfwPollEvents();
-
-            if (!shouldRun)
-            {
-                glfwSetWindowShouldClose(window, true);
-            }
         }
         
         #endif
 
+        MPI_Wait(&shouldRunRequest, MPI_STATUS_IGNORE);
+
+        #ifdef ENABLE_OPENGL
+        if (isRenderer && !shouldRun)
+        {
+            glfwSetWindowShouldClose(window, true);
+        }
+        #endif
     }
 
 
     nbodySystem.mpiFree();
-
-
-
 
     #ifdef ENABLE_OPENGL
         if (isRenderer)
