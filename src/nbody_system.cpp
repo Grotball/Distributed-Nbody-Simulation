@@ -1,11 +1,10 @@
 #include "nbody_system.h"
 
-NBodySystem::NBodySystem(const int numBodies, const bool isMaster, const bool isWorker, const MPI_Comm workerComm, const MPI_Datatype stridedComponentVecType) : 
+NBodySystem::NBodySystem(const int numBodies, const bool isMaster, const bool isWorker, const MPI_Comm workerComm) : 
         numBodies(numBodies), 
         isMaster(isMaster), 
         isWorker(isWorker), 
-        workerComm(workerComm),
-        stridedComponentVecType(stridedComponentVecType)
+        workerComm(workerComm)
 {
     pos = new float[numBodies * 3];
     vel = new float[numBodies * 3];
@@ -35,6 +34,14 @@ NBodySystem::NBodySystem(const int numBodies, const bool isMaster, const bool is
     MPI_Bcast(mass, numBodies, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
     loadBalancer = std::make_unique<StaticBalancer>(isWorker, workerComm);
+    
+    MPI_Datatype stridedComponentVecTypeNonResized;
+    MPI_Type_vector(3, 1, numBodies, MPI_FLOAT, &stridedComponentVecTypeNonResized);
+    MPI_Type_commit(&stridedComponentVecTypeNonResized);
+    MPI_Type_create_resized(stridedComponentVecTypeNonResized, 0, 1 * sizeof(float), &stridedComponentVecType);
+    MPI_Type_commit(&stridedComponentVecType);
+    MPI_Type_free(&stridedComponentVecTypeNonResized);
+    mpiFreed = false;
 }
 
 void NBodySystem::update(const float dt)
@@ -123,4 +130,15 @@ NBodySystem::~NBodySystem()
     delete[] vel;
     delete[] acc;
     delete[] mass;
+    if (!mpiFreed)
+    {
+        mpiFree();
+    }
+    
+}
+
+void NBodySystem::mpiFree()
+{
+    MPI_Type_free(&stridedComponentVecType);
+    mpiFreed = true;
 }
