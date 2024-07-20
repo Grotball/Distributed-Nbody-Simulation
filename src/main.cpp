@@ -11,7 +11,7 @@
 #endif
 
 
-#include "nbody.h"
+#include "nbody_system.h"
 
 
 
@@ -96,56 +96,7 @@ int main(int argc, char** argv)
     MPI_Comm_size(rendererComm, &rendererSize);
 
 
-
-
-
-    std::vector<int> loPartitionIndices;
-    std::vector<int> hiPartitionIndices;
-    std::vector<int> partitionSizes;
-    
-    int partitionSizeLimit = (int)std::ceil(numParticles * 1.0 / workerSize);
-    for (int i = 0; i < workerSize; i++)
-    {
-        loPartitionIndices.push_back(i * partitionSizeLimit);
-        hiPartitionIndices.push_back(std::min((i+1) * partitionSizeLimit, numParticles));
-        partitionSizes.push_back(hiPartitionIndices.back() - loPartitionIndices.back());
-    }
-
-
-    // Vector quantities are stored in a linearly index array. The x, y, z components are NOT
-    // interleaved. All the x-components contiguous, followed contiguously by all the y-components.
-
-    float* pos = new float[3 * numParticles];
-    float* vel = new float[3 * numParticles];
-    float* acc = new float[3 * numParticles];
-    float* mass = new float[numParticles];
-
-    MPI_Datatype vecArrayType, vecArrayTypeNonResized;
-    MPI_Type_vector(3, 1, numParticles, MPI_FLOAT, &vecArrayTypeNonResized);
-    MPI_Type_commit(&vecArrayTypeNonResized);
-    MPI_Type_create_resized(vecArrayTypeNonResized, 0, 1 * sizeof(float), &vecArrayType);
-    MPI_Type_commit(&vecArrayType);
-    MPI_Type_free(&vecArrayTypeNonResized);
-
-    if (isMaster)
-    {
-        std::mt19937 rng(42);
-        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-        for (int i = 0; i < numParticles; i++)
-        {
-            for (int k = 0; k < 3; k++)
-            {
-                pos[i+k*numParticles] = 10 * dist(rng);
-                vel[i+k*numParticles] = 0;
-
-            }
-            mass[i] =  100.0f / numParticles / G;
-        }
-    }
-
-    MPI_Bcast(pos, numParticles * 3, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
-    MPI_Bcast(vel, numParticles * 3, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
-    MPI_Bcast(mass, numParticles, MPI_FLOAT, masterRank, MPI_COMM_WORLD);
+    NBodySystem nbodySystem(numParticles, isMaster, isWorker, workerComm);
 
 
 
@@ -174,9 +125,9 @@ int main(int argc, char** argv)
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
             glBufferData(GL_ARRAY_BUFFER, 7 * numParticles * sizeof(float), nullptr, GL_STATIC_DRAW);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * numParticles * sizeof(float), pos);
-            glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), vel);
-            glBufferSubData(GL_ARRAY_BUFFER, 6 * numParticles * sizeof(float), 1 * numParticles * sizeof(float), mass);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * numParticles * sizeof(float), nbodySystem.pos);
+            glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), nbodySystem.vel);
+            glBufferSubData(GL_ARRAY_BUFFER, 6 * numParticles * sizeof(float), 1 * numParticles * sizeof(float), nbodySystem.mass);
 
             for (int i = 0; i < 7; i++)
             {
@@ -276,20 +227,16 @@ int main(int argc, char** argv)
         
         //========== Physics ==========//
 
-        if (isWorker)
-        {
-            nbodyIntegrate(pos, vel, acc, mass, numParticles, dt, loPartitionIndices, hiPartitionIndices, partitionSizes, workerComm);
-            MPI_Allgatherv(MPI_IN_PLACE, partitionSizes[workerRank], vecArrayType, pos, partitionSizes.data(), loPartitionIndices.data(), vecArrayType, workerComm);
-            MPI_Allgatherv(MPI_IN_PLACE, partitionSizes[workerRank], vecArrayType, vel, partitionSizes.data(), loPartitionIndices.data(), vecArrayType, workerComm);
-        }
+        nbodySystem.update(dt);
+
 
         if constexpr (masterIsWorker)
         {
             // If only the master process can render, there is not need to broadcast to itself.
             if (isRenderer && !onlyMasterRenders)
             {
-                MPI_Bcast(pos, numParticles * 3, MPI_FLOAT, masterRank, rendererComm);
-                MPI_Bcast(vel, numParticles * 3, MPI_FLOAT, masterRank, rendererComm);
+                MPI_Bcast(nbodySystem.pos, numParticles * 3, MPI_FLOAT, masterRank, rendererComm);
+                MPI_Bcast(nbodySystem.vel, numParticles * 3, MPI_FLOAT, masterRank, rendererComm);
             }
         }
         else
@@ -310,8 +257,8 @@ int main(int argc, char** argv)
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * numParticles * sizeof(float), pos);
-            glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), vel);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * numParticles * sizeof(float), nbodySystem.pos);
+            glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), nbodySystem.vel);
             
             glClearColor(0.05f, 0.06f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -335,15 +282,8 @@ int main(int argc, char** argv)
     }
 
 
+    nbodySystem.mpiFree();
 
-
-
-
-
-    delete[] pos;
-    delete[] vel;
-    delete[] acc;
-    delete[] mass;
 
 
 
@@ -359,7 +299,6 @@ int main(int argc, char** argv)
         }
     #endif
 
-    MPI_Type_free(&vecArrayType);
 
     MPI_Comm_free(&workerComm);
     MPI_Comm_free(&rendererComm);
