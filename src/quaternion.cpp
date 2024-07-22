@@ -70,3 +70,9 @@ Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs)
     q *= rhs;
     return q;
 }
+
+Quaternion conjugate(const Quaternion& quaternion)
+{
+    Quaternion q {quaternion.w, -quaternion.x, -quaternion.y, -quaternion.z};
+    return q;
+}

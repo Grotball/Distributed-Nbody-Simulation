@@ -14,3 +14,5 @@ struct Quaternion
 Quaternion operator+(const Quaternion& lhs, const Quaternion& rhs);
 Quaternion operator-(const Quaternion& lhs, const Quaternion& rhs);
 Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs);
+
+Quaternion conjugate(const Quaternion& quaternion);
