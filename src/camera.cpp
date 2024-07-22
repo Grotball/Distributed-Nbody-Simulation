@@ -12,6 +12,7 @@ Camera::Camera(const float x, const float y, const float z, const float fov, con
     aspectRatio = static_cast<float>(xRes) / yRes;
 
     computeProjectionMatrix(projectionMatrix, fov, aspectRatio, nearClip, farClip);
+    computeViewMatrix(viewMatrix, pos, conjugate(rot));
 }
 
 void computeProjectionMatrix(float projection[16], const float fov, const float aspectRatio, const float nearClip, const float farClip)
@@ -26,4 +27,40 @@ void computeProjectionMatrix(float projection[16], const float fov, const float 
     };
     
     std::memcpy(projection, A, 16 * sizeof(float));
+}
+
+void computeViewMatrix(float viewMatrix[16], const float pos[3], const Quaternion& rot)
+{
+    float w2 = rot.w * rot.w;
+    float x2 = rot.x * rot.x;
+    float y2 = rot.y * rot.y;
+    float z2 = rot.z * rot.z;
+    
+    float k = 1.0f / (w2 + x2 + y2 + z2);
+    
+    viewMatrix[0] = 1 - 2 * k * (y2 + z2);
+    viewMatrix[1] = 2 * k * (rot.x * rot.y + rot.w * rot.z);
+    viewMatrix[2] = 2 * k * (rot.x * rot.z - rot.w * rot.y);
+    viewMatrix[3] = 0;
+    
+    viewMatrix[4] = 2 * k * (rot.x * rot.y - rot.w * rot.z);
+    viewMatrix[5] = 1 - 2 * k * (x2 + z2);
+    viewMatrix[6] = 2 * k * (rot.y * rot.z + rot.w * rot.x);
+    viewMatrix[7] = 0;
+    
+    viewMatrix[8] = 2 * k * (rot.x * rot.z + rot.w * rot.y);
+    viewMatrix[9] = 2 * k * (rot.y * rot.z - rot.w * rot.x);
+    viewMatrix[10] = 1 - 2 * k * (x2 + y2);
+    viewMatrix[11] = 0;
+
+    for (int i = 0; i < 3; i++)
+    {
+        viewMatrix[12 + i] = 0;
+        for (int j = 0; j < 3; j++)
+        {
+            viewMatrix[12 + i] -= viewMatrix[i + 4 * j] * pos[j];
+        }
+    }
+
+    viewMatrix[15] = 1;
 }
