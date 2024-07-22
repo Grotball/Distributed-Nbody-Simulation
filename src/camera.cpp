@@ -15,6 +15,16 @@ Camera::Camera(const float x, const float y, const float z, const float fov, con
     computeViewMatrix(viewMatrix, pos, conjugate(rot));
 }
 
+float* Camera::getViewMatrix()
+{
+    return viewMatrix;
+}
+
+float* Camera::getProjectionMatrix()
+{
+    return projectionMatrix;
+}
+
 void computeProjectionMatrix(float projection[16], const float fov, const float aspectRatio, const float nearClip, const float farClip)
 {
     float t = 1.0f / std::tan(0.5f * fov);
