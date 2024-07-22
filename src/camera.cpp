@@ -64,3 +64,16 @@ void computeViewMatrix(float viewMatrix[16], const float pos[3], const Quaternio
 
     viewMatrix[15] = 1;
 }
+
+void Camera::rotate(const Quaternion& q)
+{
+    rot *= q;
+    computeViewMatrix(viewMatrix, pos, conjugate(rot));
+}
+void Camera::translate(float dx, float dy, float dz)
+{
+    pos[0] += dx;
+    pos[1] += dy;
+    pos[2] += dz;
+    computeViewMatrix(viewMatrix, pos, conjugate(rot));
+}

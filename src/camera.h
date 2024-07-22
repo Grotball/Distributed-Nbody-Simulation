@@ -17,6 +17,8 @@ class Camera
 
     
     Camera(const float x, const float y, const float z, const float fov, const float nearClip, const float farClip, const int xRes, const int yRes);
+    void rotate(const Quaternion& q);
+    void translate(float dx, float dy, float dz);
 };
 
 void computeProjectionMatrix(float projection[16], const float fov, const float aspectRatio, const float nearClip, const float farClip);
