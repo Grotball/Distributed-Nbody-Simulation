@@ -15,6 +15,11 @@ Camera::Camera(const float x, const float y, const float z, const float fov, con
     computeViewMatrix(viewMatrix, pos, conjugate(rot));
 }
 
+float* Camera::getPos()
+{
+    return pos;
+}
+
 float* Camera::getViewMatrix()
 {
     return viewMatrix;

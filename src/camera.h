@@ -17,6 +17,7 @@ class Camera
 
     
     Camera(const float x, const float y, const float z, const float fov, const float nearClip, const float farClip, const int xRes, const int yRes);
+    float* getPos();
     float* getViewMatrix();
     float* getProjectionMatrix();
     void rotate(const Quaternion& q);
