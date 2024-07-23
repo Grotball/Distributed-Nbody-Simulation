@@ -101,18 +101,8 @@ int main(int argc, char** argv)
 
 
     #ifdef ENABLE_OPENGL
-        float projectionMatrix[16];
-        float viewMatrix[16];
-        float fieldOfView = 0.5f * 3.141f;
-        // Set to identity.
-        for (int i = 0, k = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++, k++)
-            {
-                viewMatrix[k] = i == j ? 1 : 0;
-            }
-        }
-        computeProjectionMatrix(projectionMatrix, fieldOfView, 1, 0.1f, 100);
+        float fieldOfView = 0.25f * 3.141f;
+        Camera camera(0.0f, 0.0f, 25.0f, fieldOfView, 0.1f, 100.0f, 10, 10);
 
         unsigned int vao, vbo, particleShader;
 
@@ -139,8 +129,8 @@ int main(int argc, char** argv)
             particleShader = createShader(std::filesystem::path("src/shaders/particle.vert"), std::filesystem::path("src/shaders/particle.frag"));
 
             glUseProgram(particleShader);
-            glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, viewMatrix);
-            glUniformMatrix4fv(glGetUniformLocation(particleShader, "projection"), 1, GL_FALSE, projectionMatrix);
+            glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, camera.getViewMatrix());
+            glUniformMatrix4fv(glGetUniformLocation(particleShader, "projection"), 1, GL_FALSE, camera.getProjectionMatrix());
             glUniform1f(glGetUniformLocation(particleShader, "fovScale"), 1.0f / std::tan(0.5f * fieldOfView));
 
             #ifdef USE_GLES
@@ -265,7 +255,9 @@ int main(int argc, char** argv)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glUseProgram(particleShader);
-            glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, viewMatrix);
+            
+            glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, camera.getViewMatrix());
+            glUniformMatrix4fv(glGetUniformLocation(particleShader, "projection"), 1, GL_FALSE, camera.getProjectionMatrix());
 
             glDrawArrays(GL_POINTS, 0, numParticles);
 
