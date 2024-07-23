@@ -170,6 +170,9 @@ int main(int argc, char** argv)
     }
     #endif
 
+    constexpr float moveSpeed = 5.0f;
+    constexpr float rotSpeed = 2*3.141f * 0.25f;
+
 
     while (shouldRun)
     {
@@ -209,6 +212,34 @@ int main(int argc, char** argv)
         if (isRenderer && isMaster)
         {
             shouldRun = glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS;
+        }
+
+        if (isRenderer)
+        {
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            {
+                camera.translate(0, 0, -moveSpeed * dt);
+            }
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            {
+                camera.translate(0, 0, moveSpeed * dt);
+            }
+            if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+            {
+                float a = 0.5f * rotSpeed * dt;
+                float c1 = std::cos(a);
+                float c2 = std::sin(a);
+                Quaternion q{c1, 0, c2, 0};
+                camera.rotate(q);
+            }
+            if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+            {
+                float a = -0.5f * rotSpeed * dt;
+                float c1 = std::cos(a);
+                float c2 = std::sin(a);
+                Quaternion q{c1, 0, c2, 0};
+                camera.rotate(q);
+            }
         }
 
         #endif
