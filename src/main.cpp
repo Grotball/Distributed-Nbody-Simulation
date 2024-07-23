@@ -131,6 +131,7 @@ int main(int argc, char** argv)
             glUseProgram(particleShader);
             glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, camera.getViewMatrix());
             glUniformMatrix4fv(glGetUniformLocation(particleShader, "projection"), 1, GL_FALSE, camera.getProjectionMatrix());
+            glUniform3fv(glGetUniformLocation(particleShader, "cameraPos"), 1, camera.getPos());
             glUniform1f(glGetUniformLocation(particleShader, "fovScale"), 1.0f / std::tan(0.5f * fieldOfView));
 
             #ifdef USE_GLES
@@ -258,6 +259,7 @@ int main(int argc, char** argv)
             
             glUniformMatrix4fv(glGetUniformLocation(particleShader, "view"), 1, GL_FALSE, camera.getViewMatrix());
             glUniformMatrix4fv(glGetUniformLocation(particleShader, "projection"), 1, GL_FALSE, camera.getProjectionMatrix());
+            glUniform3fv(glGetUniformLocation(particleShader, "cameraPos"), 1, camera.getPos());
 
             glDrawArrays(GL_POINTS, 0, numParticles);
 

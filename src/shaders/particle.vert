@@ -13,6 +13,7 @@ out float speed;
 // into single matrix.
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec3 cameraPos;
 uniform float fovScale;
 
 void main()
@@ -25,7 +26,7 @@ void main()
     // distance from view position.
     // Because camera position is currently fixed to origin,
     // it is just length of the vector.
-    float d = length(pos);
+    float d = length(pos - cameraPos);
 
     // need to make independent from screen resolution.
     // Scaling of point size with distance does not take in
