@@ -207,11 +207,14 @@ int main(int argc, char** argv)
 
         //========== Input ==========//
 
+        bool shouldPause = false;
+
         #ifdef ENABLE_OPENGL
 
         if (isRenderer && isMaster)
         {
             shouldRun = glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS;
+            shouldPause = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
         }
 
         if (isRenderer)
@@ -246,11 +249,15 @@ int main(int argc, char** argv)
 
         MPI_Request shouldRunRequest;
         MPI_Ibcast(&shouldRun, 1, MPI_CXX_BOOL, masterRank, MPI_COMM_WORLD, &shouldRunRequest);
+        MPI_Bcast(&shouldPause, 1, MPI_CXX_BOOL, masterRank, MPI_COMM_WORLD);
 
         
         //========== Physics ==========//
 
-        nbodySystem.update(dt);
+        if (!shouldPause)
+        {
+            nbodySystem.update(dt);
+        }
 
 
         if constexpr (masterIsWorker)
