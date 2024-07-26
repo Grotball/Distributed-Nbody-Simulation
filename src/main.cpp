@@ -243,6 +243,23 @@ int main(int argc, char** argv)
                 Quaternion q{c1, 0, c2, 0};
                 camera.rotate(q);
             }
+
+            if (glfwGetKey(window, GLFW_KEY_UP))
+            {
+                float a = -0.5f * rotSpeed * dt;
+                float c1 = std::cos(a);
+                float c2 = std::sin(a);
+                Quaternion q{c1, c2, 0, 0};
+                camera.rotate(q);
+            }
+            if (glfwGetKey(window, GLFW_KEY_DOWN))
+            {
+                float a = 0.5f * rotSpeed * dt;
+                float c1 = std::cos(a);
+                float c2 = std::sin(a);
+                Quaternion q{c1, c2, 0, 0};
+                camera.rotate(q);
+            }
         }
 
         #endif
