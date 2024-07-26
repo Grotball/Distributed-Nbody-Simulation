@@ -12,7 +12,7 @@ Camera::Camera(const float x, const float y, const float z, const float fov, con
     aspectRatio = static_cast<float>(xRes) / yRes;
 
     computeProjectionMatrix(projectionMatrix, fov, aspectRatio, nearClip, farClip);
-    computeViewMatrix(viewMatrix, pos, conjugate(rot));
+    computeViewMatrix(viewMatrix, pos, rot);
 }
 
 float* Camera::getPos()
@@ -46,7 +46,7 @@ void computeProjectionMatrix(float projection[16], const float fov, const float 
 
 void computeViewMatrix(float viewMatrix[16], const float pos[3], const Quaternion& rot)
 {
-    computeQuaternionRotationMatrix(viewMatrix, rot);
+    computeQuaternionRotationMatrix(viewMatrix, conjugate(rot));
 
     for (int i = 0; i < 3; i++)
     {
@@ -63,12 +63,12 @@ void computeViewMatrix(float viewMatrix[16], const float pos[3], const Quaternio
 void Camera::rotate(const Quaternion& q)
 {
     rot *= q;
-    computeViewMatrix(viewMatrix, pos, conjugate(rot));
+    computeViewMatrix(viewMatrix, pos, rot);
 }
 void Camera::translate(float dx, float dy, float dz)
 {
     pos[0] += dx;
     pos[1] += dy;
     pos[2] += dz;
-    computeViewMatrix(viewMatrix, pos, conjugate(rot));
+    computeViewMatrix(viewMatrix, pos, rot);
 }
