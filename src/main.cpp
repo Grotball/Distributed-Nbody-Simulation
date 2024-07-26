@@ -229,7 +229,7 @@ int main(int argc, char** argv)
             }
             if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
             {
-                float a = 0.5f * rotSpeed * dt;
+                float a = -0.5f * rotSpeed * dt;
                 float c1 = std::cos(a);
                 float c2 = std::sin(a);
                 Quaternion q{c1, 0, c2, 0};
@@ -237,7 +237,7 @@ int main(int argc, char** argv)
             }
             if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
             {
-                float a = -0.5f * rotSpeed * dt;
+                float a = 0.5f * rotSpeed * dt;
                 float c1 = std::cos(a);
                 float c2 = std::sin(a);
                 Quaternion q{c1, 0, c2, 0};
