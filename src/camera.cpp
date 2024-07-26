@@ -50,11 +50,7 @@ void computeViewMatrix(float viewMatrix[16], const float pos[3], const Quaternio
 
     for (int i = 0; i < 3; i++)
     {
-        viewMatrix[12 + i] = 0;
-        for (int j = 0; j < 3; j++)
-        {
-            viewMatrix[12 + i] -= viewMatrix[i + 4 * j] * pos[j];
-        }
+        viewMatrix[12 + i] = -pos[i];
     }
 
     viewMatrix[15] = 1;
