@@ -56,15 +56,21 @@ void computeViewMatrix(float viewMatrix[16], const float pos[3], const Quaternio
     viewMatrix[15] = 1;
 }
 
-void Camera::rotate(const Quaternion& q)
+void Camera::rotate(const Quaternion& q, const bool recomputeViewMatrix)
 {
     rot *= q;
-    computeViewMatrix(viewMatrix, pos, rot);
+    if (recomputeViewMatrix)
+    {
+        computeViewMatrix(viewMatrix, pos, rot);
+    }
 }
-void Camera::translate(float dx, float dy, float dz)
+void Camera::translate(float dx, float dy, float dz, const bool recomputeViewMatrix)
 {
     pos[0] += dx;
     pos[1] += dy;
     pos[2] += dz;
-    computeViewMatrix(viewMatrix, pos, rot);
+    if (recomputeViewMatrix)
+    {
+        computeViewMatrix(viewMatrix, pos, rot);
+    }
 }

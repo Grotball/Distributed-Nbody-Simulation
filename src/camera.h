@@ -20,8 +20,8 @@ class Camera
     float* getPos();
     float* getViewMatrix();
     float* getProjectionMatrix();
-    void rotate(const Quaternion& q);
-    void translate(float dx, float dy, float dz);
+    void rotate(const Quaternion& q, const bool recomputeViewMatrix=true);
+    void translate(float dx, float dy, float dz, const bool recomputeViewMatrix=true);
 };
 
 void computeProjectionMatrix(float projection[16], const float fov, const float aspectRatio, const float nearClip, const float farClip);
