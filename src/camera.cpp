@@ -30,7 +30,7 @@ float* Camera::getProjectionMatrix()
     return projectionMatrix;
 }
 
-void computeProjectionMatrix(float projection[16], const float fov, const float aspectRatio, const float nearClip, const float farClip)
+void computeProjectionMatrix(float (&projection)[16], const float fov, const float aspectRatio, const float nearClip, const float farClip)
 {
     float t = 1.0f / std::tan(0.5f * fov);
     // Matrix uses coloumn major ordering.
@@ -44,7 +44,7 @@ void computeProjectionMatrix(float projection[16], const float fov, const float 
     std::memcpy(projection, A, 16 * sizeof(float));
 }
 
-void computeViewMatrix(float viewMatrix[16], const float pos[3], const Quaternion& rot)
+void computeViewMatrix(float (&viewMatrix)[16], const float pos[3], const Quaternion& rot)
 {
     computeQuaternionRotationMatrix(viewMatrix, conjugate(rot));
 

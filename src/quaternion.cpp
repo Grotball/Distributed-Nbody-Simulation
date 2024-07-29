@@ -77,7 +77,7 @@ Quaternion conjugate(const Quaternion& quaternion)
     return q;
 }
 
-void computeQuaternionRotationMatrix(float R[16], const Quaternion& rot)
+void computeQuaternionRotationMatrix(float (&R)[16], const Quaternion& rot)
 {
     const float w2 = rot.w * rot.w;
     const float x2 = rot.x * rot.x;

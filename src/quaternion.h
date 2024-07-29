@@ -16,4 +16,4 @@ Quaternion operator-(const Quaternion& lhs, const Quaternion& rhs);
 Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs);
 
 Quaternion conjugate(const Quaternion& quaternion);
-void computeQuaternionRotationMatrix(float R[16], const Quaternion& rot);
+void computeQuaternionRotationMatrix(float (&R)[16], const Quaternion& rot);
