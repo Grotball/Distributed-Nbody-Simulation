@@ -1,5 +1,5 @@
 CXX := mpic++
-CFLAGS := -g -Wall -march=native
+CFLAGS := -std=c++17 -g -Wall -march=native
 
 PROGRAM_NAME = nbody_simulation
 
