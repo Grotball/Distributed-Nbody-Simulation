@@ -44,7 +44,7 @@ void computeProjectionMatrix(float (&projection)[16], const float fov, const flo
     std::memcpy(projection, A, 16 * sizeof(float));
 }
 
-void computeViewMatrix(float (&viewMatrix)[16], const float pos[3], const Quaternion& rot)
+void computeViewMatrix(float (&viewMatrix)[16], const float (&pos)[3], const Quaternion& rot)
 {
     computeQuaternionRotationMatrix(viewMatrix, conjugate(rot));
 

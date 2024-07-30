@@ -26,4 +26,4 @@ class Camera
 
 void computeProjectionMatrix(float (&projection)[16], const float fov, const float aspectRatio, const float nearClip, const float farClip);
 
-void computeViewMatrix(float (&viewMatrix)[16], const float pos[3], const Quaternion& rot);
+void computeViewMatrix(float (&viewMatrix)[16], const float (&pos)[3], const Quaternion& rot);
