@@ -1,6 +1,4 @@
 #include <iostream>
-#include <mpi.h>
-#include <random>
 #include <cstring>
 
 
