@@ -56,13 +56,12 @@ void NBodySystem::update(const float dt)
     while (isWorker && !loadBalancer->isFinished())
     {
         WorkTask workTask = loadBalancer->getWork();
+        MPI_Request request;
 
         bool isReceiveTask = workTask.workSource != workerRank && workTask.workSource >= 0;
         if (isReceiveTask)
         {
-            MPI_Request request;
             MPI_Ibcast(acc+workTask.workStart, workTask.workLength, stridedComponentVecType, workTask.workSource, workerComm, &request);
-            requests.emplace_back(request);
         }
         else
         {
@@ -71,10 +70,10 @@ void NBodySystem::update(const float dt)
 
             computeAccelleration(acc, pos, mass, lo, hi, numBodies);
 
-            MPI_Request request;
             MPI_Ibcast(acc+workTask.workStart, workTask.workLength, stridedComponentVecType, workerRank, workerComm, &request);
             requests.emplace_back(request);
         }
+        requests.emplace_back(request);
     }
     
     if (isWorker)
