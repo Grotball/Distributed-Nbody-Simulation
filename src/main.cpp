@@ -23,7 +23,7 @@ constexpr bool renderersDoWork = true;
 constexpr bool masterCanDoWork = true;
 constexpr bool masterIsWorker = masterCanDoWork && renderersDoWork;
 
-constexpr int numParticles = 64;
+constexpr int numParticles = 1064;
 
 
 int main(int argc, char** argv)
