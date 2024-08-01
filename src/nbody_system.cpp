@@ -71,7 +71,6 @@ void NBodySystem::update(const float dt)
             computeAccelleration(acc, pos, mass, lo, hi, numBodies);
 
             MPI_Ibcast(acc+workTask.workStart, workTask.workLength, stridedComponentVecType, workerRank, workerComm, &request);
-            requests.emplace_back(request);
         }
         requests.emplace_back(request);
     }
