@@ -41,12 +41,7 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &clusterSize);
 
-
-
-
     const bool isMaster = rank == masterRank;
-
-
 
     MPI_Comm nodeComm;
 
@@ -122,7 +117,6 @@ int main(int argc, char** argv)
                 glVertexAttribPointer(i, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(i * numParticles * sizeof(float)));
                 glEnableVertexAttribArray(i);
             }
-             
 
             particleShader = createShader(std::filesystem::path("src/shaders/particle.vert"), std::filesystem::path("src/shaders/particle.frag"));
 
@@ -143,9 +137,8 @@ int main(int argc, char** argv)
     
     
 
-
-    bool shouldRun = true;
-
+    constexpr float moveSpeed = 5.0f;
+    constexpr float rotSpeed = 2*3.141f * 0.25f;
 
 
     // The timestep is the real-world time elapsed since start of last frame
@@ -167,9 +160,8 @@ int main(int argc, char** argv)
         frameTimes[i] = maximumTimeStep;
     }
     #endif
-
-    constexpr float moveSpeed = 5.0f;
-    constexpr float rotSpeed = 2*3.141f * 0.25f;
+    
+    bool shouldRun = true;
 
 
     while (shouldRun)
