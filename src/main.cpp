@@ -297,7 +297,7 @@ int main(int argc, char** argv)
             glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * numParticles * sizeof(float), nbodySystem.pos);
             glBufferSubData(GL_ARRAY_BUFFER, 3 * numParticles * sizeof(float), 3 * numParticles * sizeof(float), nbodySystem.vel);
             
-            glClearColor(0.05f, 0.06f, 0.1f, 1.0f);
+            glClearColor(0.00f, 0.00f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glUseProgram(particleShader);
