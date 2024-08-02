@@ -95,7 +95,13 @@ int main(int argc, char** argv)
 
     #ifdef ENABLE_OPENGL
         float fieldOfView = 0.25f * 3.141f;
-        Camera camera(0.0f, 0.0f, 25.0f, fieldOfView, 0.1f, 100.0f, 10, 10);
+        int xRes = 10;
+        int yRes = 10;
+        if (isRenderer)
+        {
+            glfwGetWindowSize(window, &xRes, &yRes);
+        }
+        Camera camera(0.0f, 0.0f, 25.0f, fieldOfView, 0.1f, 100.0f, xRes, yRes);
 
         unsigned int vao, vbo, particleShader;
 
