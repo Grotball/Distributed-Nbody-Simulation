@@ -297,6 +297,9 @@ int main(int argc, char** argv)
 
         if (isRenderer)
         {
+            glfwGetWindowSize(window, &xRes, &yRes);
+            camera.updateScreenSize(xRes, yRes);
+            
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
