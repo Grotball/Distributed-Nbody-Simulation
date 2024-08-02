@@ -74,3 +74,9 @@ void Camera::translate(float dx, float dy, float dz, const bool recomputeViewMat
         computeViewMatrix(viewMatrix, pos, rot);
     }
 }
+
+void Camera::updateScreenSize(const int xRes, const int yRes)
+{
+    aspectRatio = static_cast<float>(xRes) / yRes;
+    computeProjectionMatrix(projectionMatrix, fov, aspectRatio, nearClip, farClip);
+}
