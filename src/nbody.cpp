@@ -87,7 +87,19 @@ void computeAccelleration(float* acc, const float* pos, const float* mass, const
     }
 }
 
-void nbodyIntegrate(float* pos, float* vel, float* acc, float* mass, const int numParticles, const float dt, const std::vector<int>& loPartitionIndices, const std::vector<int>& hiPartitionIndices, const std::vector<int>& partitionSizes, const MPI_Comm comm)
+void nbodyIntegrate(
+    float* pos, 
+    float* vel, 
+    float* acc, 
+    float* mass, 
+    const int numParticles, 
+    const float dt, const 
+    std::vector<int>& 
+    loPartitionIndices, 
+    const std::vector<int>& hiPartitionIndices, 
+    const std::vector<int>& partitionSizes, 
+    const MPI_Comm comm
+    )
 {
     int rank;
     MPI_Comm_rank(comm, &rank);
