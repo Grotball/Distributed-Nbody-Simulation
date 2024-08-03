@@ -2,6 +2,7 @@
 #include <cmath>
 #include <mpi.h>
 #include <vector>
+#include "arch_config.h"
 
 constexpr float softeningFactor = 1.0e-3f;
 constexpr float G = 6.67430e-11f;
