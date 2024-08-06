@@ -10,11 +10,11 @@ LIBS :=
 
 DEFINE_FLAGS :=
 
-GLAD_DIR = glad
+glad_dir = glad
 
-ifdef enable_opengl
-	SRC_DIRS += $(GLAD_DIR)/src
-	INC_DIRS += $(GLAD_DIR)/include
+ifeq ($(enable_opengl), 1)
+	SRC_DIRS += $(glad_dir)/src
+	INC_DIRS += $(glad_dir)/include
 	LIBS += -lGL -lglfw
 	DEFINE_FLAGS += -DENABLE_OPENGL
 endif
