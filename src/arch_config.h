@@ -7,6 +7,9 @@
 #if defined(__AVX__)
 #define USE_SIMD
 constexpr int MaxPackedFloats = 8;
+#elif defined(__SSE2__)
+#define USE_SIMD
+constexpr int MaxPackedFloats = 4;
 #else
 constexpr int MaxPackedFloats = 1;
 #endif

@@ -9,6 +9,9 @@ void computeAccelleration(float* acc, const float* pos, const float* mass, const
     #ifdef __AVX__
     const __m256 softeningFactor2 = _mm256_set1_ps(softeningFactor*softeningFactor);
     const __m256 G_v = _mm256_set1_ps(G);
+    #elif __SSE2__
+    const __m128 softeningFactor2 = _mm_set1_ps(softeningFactor*softeningFactor);
+    const __m128 G_v = _mm_set1_ps(G);
     #endif
 
     #else
@@ -74,6 +77,35 @@ void computeAccelleration(float* acc, const float* pos, const float* mass, const
             a1 = _mm256_fnmadd_ps(s, rx, a1);
             a2 = _mm256_fnmadd_ps(s, ry, a2);
             a3 = _mm256_fnmadd_ps(s, rz, a3);
+        }
+        #elif __SSE2__
+        const __m128 xi_v = _mm_set1_ps(xi);
+        const __m128 yi_v = _mm_set1_ps(yi);
+        const __m128 zi_v = _mm_set1_ps(zi);
+        __m128 a1 = _mm_setzero_ps();
+        __m128 a2 = _mm_setzero_ps();
+        __m128 a3 = _mm_setzero_ps();
+
+        for (auto j = n; j < numParticles; j+=stride)
+        {
+            const __m128 mjG = _mm_mul_ps(G_v, _mm_loadu_ps(mass + j));
+            const __m128 rx = _mm_sub_ps(xi_v, _mm_loadu_ps(pos + j));
+            const __m128 ry = _mm_sub_ps(yi_v, _mm_loadu_ps(pos + numParticles + j));
+            const __m128 rz = _mm_sub_ps(zi_v, _mm_loadu_ps(pos + 2*numParticles + j));
+            const __m128 r2 = _mm_add_ps(
+                _mm_mul_ps(rx, rx),
+                _mm_add_ps(
+                    _mm_mul_ps(ry, ry), 
+                    _mm_mul_ps(rz, rz)
+                )
+            );
+            __m128 s = _mm_rsqrt_ps(
+                _mm_add_ps(softeningFactor2, r2)
+            );
+            s = _mm_mul_ps(_mm_mul_ps(s, mjG), _mm_mul_ps(s, s));
+            a1 = _mm_sub_ps(a1, _mm_mul_ps(s, rx));
+            a2 = _mm_sub_ps(a2, _mm_mul_ps(s, ry));
+            a3 = _mm_sub_ps(a3, _mm_mul_ps(s, rz));
         }
         #endif
 
