@@ -8,3 +8,7 @@ designed to run on small computing clusters.
 Section currently in progress ☹️... 
 
 (Dont't worry, instructions should be available within the next two weeks 🤞.)
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
