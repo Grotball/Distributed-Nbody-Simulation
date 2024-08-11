@@ -9,9 +9,9 @@
 // NOTE: This class will likely experience major changes.
 class NBodySystem
 {
-    const int numBodies;
-    const bool isMaster;
-    const bool isWorker;
+    int numBodies;
+    bool isMaster;
+    bool isWorker;
     MPI_Comm workerComm;
     MPI_Datatype stridedComponentVecType;
     std::unique_ptr<LoadBalancer> loadBalancer;
