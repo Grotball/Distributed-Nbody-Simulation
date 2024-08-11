@@ -14,7 +14,9 @@ NBodySystem::NBodySystem(const int numBodies, const bool isMaster, const bool is
     // This is just a placeholder, will later make constructor that
     // gives some control of initial conditions.
 
-    if (isMaster)
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank == 0)
     {
         std::mt19937 rng(42);
         std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
