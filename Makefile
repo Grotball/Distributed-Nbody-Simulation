@@ -30,4 +30,4 @@ LIB_FLAGS := $(addprefix -L, $(LIB_DIRS))
 
 .PHONY: all
 all:
-	$(CXX) $(CFLAGS) $(INC_FLAGS) $(SRC) -o $(PROGRAM_NAME) $(LIBS) $(DEFINE_FLAGS)
+	$(CXX) $(CFLAGS) $(INC_FLAGS) $(LIB_FLAGS) $(SRC) -o $(PROGRAM_NAME) $(LIBS) $(DEFINE_FLAGS)
