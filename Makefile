@@ -1,7 +1,7 @@
 CXX := mpic++
 CFLAGS := -std=c++17 -g -Wall -march=native
 
-PROGRAM_NAME = nbody_simulation
+PROGRAM_NAME = distributed_nbody_simulation
 
 
 SRC_DIRS := src
