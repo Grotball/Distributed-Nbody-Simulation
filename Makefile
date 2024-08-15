@@ -20,8 +20,6 @@ ifeq ($(enable_opengl), 1)
 endif
 
 
-
-
 SRC := $(shell find $(SRC_DIRS) -name '*.cpp' -or -name '*.c')
 INC_FLAGS := $(addprefix -I, $(INC_DIRS))
 
