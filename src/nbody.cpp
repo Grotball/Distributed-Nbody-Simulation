@@ -125,9 +125,8 @@ void nbodyIntegrate(
     float* acc, 
     float* mass, 
     const int numParticles, 
-    const float dt, const 
-    std::vector<int>& 
-    loPartitionIndices, 
+    const float dt, 
+    const std::vector<int>& loPartitionIndices, 
     const std::vector<int>& hiPartitionIndices, 
     const std::vector<int>& partitionSizes, 
     const MPI_Comm comm
