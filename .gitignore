@@ -3,3 +3,5 @@
 build/
 
 distributed_nbody_simulation
+
+.DS_Store
